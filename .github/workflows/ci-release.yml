@@ -3,10 +3,10 @@ name: CI and AppImage Release
 on:
   push:
     branches:
-      - main
+      - master
   pull_request:
     branches:
-      - main
+      - master
 
 permissions:
   contents: write
@@ -59,7 +59,7 @@ jobs:
 
   release_appimage:
     name: Build AppImage and Create Release
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     needs: verify
     runs-on: ubuntu-22.04
 
@@ -112,8 +112,8 @@ jobs:
         id: meta
         run: |
           SHORT_SHA="${GITHUB_SHA::7}"
-          TAG="main-${GITHUB_SHA}"
-          NAME="Main build ${SHORT_SHA}"
+          TAG="master-${GITHUB_SHA}"
+          NAME="Master build ${SHORT_SHA}"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
           echo "name=$NAME" >> "$GITHUB_OUTPUT"
 
