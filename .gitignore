@@ -7,7 +7,6 @@ src-tauri/target/
 
 # OpenCode and OpenSpec local state
 .opencode/
-openspec/changes/
 
 # IDE and editor settings
 .idea/
