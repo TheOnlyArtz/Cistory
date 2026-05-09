@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cistory</title>
+    <script type="module" src="/src/main.ts"></script>
+  </head>
+  <body>
+    <main class="picker-shell">
+      <header class="picker-header">
+        <h1 class="picker-title">Cistory</h1>
+        <button
+          id="view-toggle-button"
+          class="icon-button"
+          type="button"
+          aria-label="Open settings"
+          title="Open settings"
+        >
+          ⚙
+        </button>
+      </header>
+
+      <section class="status-bar">
+        <span id="status-message">Loading history…</span>
+      </section>
+
+      <section id="history-view" class="view-panel">
+        <ol id="entry-list" class="entry-list" tabindex="0" aria-label="Clipboard history"></ol>
+      </section>
+
+      <section id="settings-view" class="view-panel" hidden>
+        <form id="settings-form" class="settings-form" novalidate>
+          <label class="settings-label" for="hotkey-input">Hotkey binding</label>
+          <div class="hotkey-row">
+            <input id="hotkey-input" class="hotkey-input" type="text" autocomplete="off" spellcheck="false" />
+            <button id="record-hotkey-button" class="record-button" type="button">Record</button>
+            <button id="apply-hotkey-button" class="apply-button" type="submit">Apply</button>
+          </div>
+
+          <label class="autostart-row" for="autostart-toggle">
+            <span>Start on login</span>
+            <input id="autostart-toggle" type="checkbox" />
+          </label>
+
+          <p id="settings-status" class="settings-status" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+    </main>
+  </body>
+</html>
