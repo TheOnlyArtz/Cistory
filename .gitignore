@@ -1,0 +1,19 @@
+node_modules/
+dist/
+
+# Rust build outputs
+target/
+src-tauri/target/
+
+# OpenCode and OpenSpec local state
+.opencode/
+openspec/changes/
+
+# IDE and editor settings
+.idea/
+.vscode/
+
+# Local OS/editor noise
+.DS_Store
+*.log
+*.swp
