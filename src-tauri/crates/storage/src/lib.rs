@@ -34,7 +34,7 @@ fn migrations() -> Migrations<'static> {
                 autostart_enabled,
                 retention_days,
                 ignore_sensitive_apps
-            ) VALUES (1, 'Super+V', 0, 7, 0);
+            ) VALUES (1, 'Super+V', 0, 2, 0);
             ",
         ),
         M::up(
@@ -480,5 +480,26 @@ mod tests {
 
         assert_eq!(deleted, 1);
         assert_eq!(paths, vec!["/tmp/cistory-images/old-image-hash.png".to_string()]);
+    }
+
+    #[test]
+    fn initializes_settings_with_two_day_retention_default() {
+        let store = SqliteStore::open_in_memory().expect("store");
+
+        let settings = store.load_settings().expect("load settings");
+
+        assert_eq!(settings.retention_days, 2);
+    }
+
+    #[test]
+    fn preserves_custom_retention_override() {
+        let store = SqliteStore::open_in_memory().expect("store");
+        let mut settings = store.load_settings().expect("load settings");
+        settings.retention_days = 14;
+        store.save_settings(&settings).expect("save settings");
+
+        let reloaded = store.load_settings().expect("reload settings");
+
+        assert_eq!(reloaded.retention_days, 14);
     }
 }

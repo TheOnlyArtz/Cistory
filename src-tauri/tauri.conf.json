@@ -30,7 +30,16 @@
       "csp": null,
       "assetProtocol": {
         "enable": true,
-        "scope": ["**"]
+        "scope": {
+          "allow": [
+            "$APPDATA/**",
+            "$APPCONFIG/**",
+            "$LOCALDATA/**",
+            "$HOME/**"
+          ],
+          "deny": [],
+          "requireLiteralLeadingDot": false
+        }
       }
     }
   },

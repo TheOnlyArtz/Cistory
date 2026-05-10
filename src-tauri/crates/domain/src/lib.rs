@@ -45,7 +45,7 @@ impl Default for Settings {
         Self {
             hotkey_binding: "Super+V".to_string(),
             autostart_enabled: false,
-            retention_days: 7,
+            retention_days: 2,
             ignore_sensitive_apps: false,
         }
     }
@@ -224,7 +224,9 @@ mod tests {
 
     #[test]
     fn accepts_default_settings() {
-        assert!(Settings::default().validate().is_ok());
+        let settings = Settings::default();
+        assert_eq!(settings.retention_days, 2);
+        assert!(settings.validate().is_ok());
     }
 
     #[test]

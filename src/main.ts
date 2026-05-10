@@ -16,6 +16,7 @@ type ClipboardEntry = {
 type AppSettings = {
   hotkey_binding: string;
   autostart_enabled: boolean;
+  retention_days: number;
 };
 
 type ViewMode = "history" | "settings";
@@ -33,6 +34,7 @@ const hotkeyInput = document.querySelector<HTMLInputElement>("#hotkey-input")!;
 const recordHotkeyButton = document.querySelector<HTMLButtonElement>("#record-hotkey-button")!;
 const applyHotkeyButton = document.querySelector<HTMLButtonElement>("#apply-hotkey-button")!;
 const autostartToggle = document.querySelector<HTMLInputElement>("#autostart-toggle")!;
+const retentionDefaultDays = document.querySelector<HTMLSpanElement>("#retention-default-days")!;
 const settingsStatus = document.querySelector<HTMLParagraphElement>("#settings-status")!;
 
 let entries: ClipboardEntry[] = [];
@@ -55,6 +57,52 @@ const formatEntryPreview = (content: string) => {
   }
 
   return `${content.slice(0, ENTRY_PREVIEW_LIMIT)}...`;
+};
+
+const buildImagePreviewSources = (imagePath: string): string[] => {
+  const trimmed = imagePath.trim();
+  if (!trimmed) {
+    return [];
+  }
+
+  const directSources = new Set<string>();
+  if (trimmed.startsWith("asset:") || trimmed.startsWith("http://asset.localhost/")) {
+    directSources.add(trimmed);
+  }
+
+  let normalizedPath = trimmed;
+  if (trimmed.startsWith("file://")) {
+    try {
+      normalizedPath = decodeURIComponent(new URL(trimmed).pathname);
+    } catch (_error) {
+      normalizedPath = trimmed.slice("file://".length);
+    }
+  }
+
+  normalizedPath = normalizedPath.replace(/\\/g, "/");
+
+  const convertedSources = new Set<string>();
+  const pushConverted = (candidate: string) => {
+    if (!candidate) {
+      return;
+    }
+
+    try {
+      convertedSources.add(convertFileSrc(candidate));
+    } catch (error) {
+      console.warn("Failed to convert image preview path", { candidate, error });
+    }
+  };
+
+  pushConverted(normalizedPath);
+
+  if (/^[A-Za-z]:\//.test(normalizedPath)) {
+    pushConverted(`/${normalizedPath}`);
+  } else if (/^\/[A-Za-z]:\//.test(normalizedPath)) {
+    pushConverted(normalizedPath.slice(1));
+  }
+
+  return [...directSources, ...convertedSources];
 };
 
 const setSettingsStatus = (message: string, tone: SettingsTone = "info") => {
@@ -128,6 +176,7 @@ const loadSettings = async () => {
   const settings = await invoke<AppSettings>("load_settings");
   hotkeyInput.value = settings.hotkey_binding;
   autostartToggle.checked = settings.autostart_enabled;
+  retentionDefaultDays.textContent = String(settings.retention_days);
   lastSavedHotkey = settings.hotkey_binding;
   settingsLoaded = true;
   setSettingsStatus("Settings loaded.");
@@ -357,15 +406,39 @@ const renderEntries = () => {
         const image = document.createElement("img");
         image.className = "entry-image";
         image.alt = "Clipboard image preview";
-        image.src = convertFileSrc(entry.image_path);
-        image.addEventListener("error", () => {
+
+        const previewSources = buildImagePreviewSources(entry.image_path);
+        let sourceIndex = 0;
+
+        const showFallback = () => {
           imageFrame.innerHTML = "";
           const fallback = document.createElement("span");
           fallback.className = "entry-image-missing";
           fallback.textContent = "Image unavailable";
           imageFrame.append(fallback);
+        };
+
+        image.addEventListener("error", () => {
+          sourceIndex += 1;
+          if (sourceIndex < previewSources.length) {
+            image.src = previewSources[sourceIndex];
+            return;
+          }
+
+          console.warn("Image preview failed to load", {
+            imagePath: entry.image_path,
+            attemptedSources: previewSources,
+            currentSrc: image.currentSrc,
+          });
+          showFallback();
         });
-        imageFrame.append(image);
+
+        if (previewSources.length === 0) {
+          showFallback();
+        } else {
+          image.src = previewSources[sourceIndex];
+          imageFrame.append(image);
+        }
       } else {
         const fallback = document.createElement("span");
         fallback.className = "entry-image-missing";
