@@ -2,6 +2,8 @@
 
 Cistory is a Linux-first clipboard history manager built with Tauri 2, Rust, and a lightweight TypeScript UI. It runs in the background, captures clipboard updates, stores them locally in SQLite, and gives you a fast keyboard-driven picker inspired by `Win+V`.
 
+<img width="510" height="489" alt="image" src="https://github.com/user-attachments/assets/faa441a3-d77a-44f0-9c25-3a58c33554c0" />
+
 ## Disclaimer
 
 This project is 100% vibe-coded in a couple of hours. It is functional and useful, but still early-stage software: expect rough edges, validate behavior on your desktop setup, and use with appropriate caution around sensitive clipboard content.
