@@ -34,20 +34,19 @@ jobs:
             librsvg2-dev \
             patchelf
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: 20
-          cache: npm
+          bun-version: latest
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
 
       - name: Install frontend dependencies
-        run: npm ci
+        run: bun install
 
       - name: Build frontend
-        run: npm run build
+        run: bun run build
 
       - name: Check Rust workspace
         run: cargo check --workspace
@@ -81,20 +80,19 @@ jobs:
             librsvg2-dev \
             patchelf
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: 20
-          cache: npm
+          bun-version: latest
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
 
       - name: Install frontend dependencies
-        run: npm ci
+        run: bun install
 
       - name: Build AppImage
-        run: npm run tauri:build -- --bundles appimage
+        run: bun run tauri:build -- --bundles appimage
 
       - name: Resolve AppImage artifact
         id: appimage
