@@ -124,6 +124,39 @@ jobs:
           path: ${{ steps.appimage.outputs.path }}
           if-no-files-found: error
 
+      - name: Resolve binary artifact
+        id: binary
+        run: |
+          BIN_PATH=""
+          candidates=(
+            src-tauri/target/${{ matrix.target }}/release/cistory-desktop
+            src-tauri/target/release/cistory-desktop
+          )
+
+          for candidate in "${candidates[@]}"; do
+            if [ -f "$candidate" ]; then
+              BIN_PATH="$candidate"
+              break
+            fi
+          done
+
+          if [ -z "$BIN_PATH" ]; then
+            echo "No release binary was produced."
+            exit 1
+          fi
+
+          mkdir -p release-binaries
+          BINARY_ARCHIVE="release-binaries/cistory-desktop-${{ matrix.target }}.tar.gz"
+          tar -czf "$BINARY_ARCHIVE" -C "$(dirname "$BIN_PATH")" "$(basename "$BIN_PATH")"
+          echo "path=$BINARY_ARCHIVE" >> "$GITHUB_OUTPUT"
+
+      - name: Upload binary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: binary-${{ matrix.target }}
+          path: ${{ steps.binary.outputs.path }}
+          if-no-files-found: error
+
   release_appimage:
     name: Create GitHub Release with AppImages
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
@@ -135,6 +168,13 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           pattern: appimage-*
+          path: release-artifacts
+          merge-multiple: true
+
+      - name: Download binary artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: binary-*
           path: release-artifacts
           merge-multiple: true
 
@@ -156,3 +196,4 @@ jobs:
           generate_release_notes: true
           files: |
             release-artifacts/*.AppImage
+            release-artifacts/*.tar.gz
